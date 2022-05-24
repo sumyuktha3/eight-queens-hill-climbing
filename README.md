@@ -31,11 +31,10 @@ Plot a graph between time taken and iterations.
 # PROGRAM
 ## Developed By: S.Sumyuktha Rani
 ## Register Number: 212220230050
-~~~
+
+```
 %matplotlib inline
-import time
 import matplotlib.pyplot as plt
-import numpy as np
 import random
 import math
 import sys
@@ -43,8 +42,7 @@ from collections import defaultdict, deque, Counter
 from itertools import combinations
 from IPython.display import display
 from notebook import plot_NQueens
-Problems
-This is the abstract class. Specific problem domains will subclass this.
+
 class Problem(object):
     """The abstract class for a formal problem. A new domain subclasses this,
     overriding `actions` and `results`, and perhaps other methods.
@@ -67,8 +65,7 @@ class Problem(object):
     def __str__(self):
         return '{0}({1}, {2})'.format(
             type(self).__name__, self.initial, self.goal)
-Nodes
-This is the Node in the search tree. Helper functions (expand, path_actions, path_states) use this Node class.
+
 class Node:
     "A Node in a search tree."
     def __init__(self, state, parent=None, action=None, path_cost=0):
@@ -80,12 +77,14 @@ class Node:
         return 0 if self.parent is None else (1 + len(self.parent))
     def __lt__(self, other): 
         return self.path_cost < other.path_cost
+
+
 failure = Node('failure', path_cost=math.inf) # Indicates an algorithm couldn't find a solution.
 cutoff  = Node('cutoff',  path_cost=math.inf) # Indicates iterative deepening search was cut off.
-Helper functions
+
 def expand(problem, state):
     return problem.actions(state)
-Solving NQueens Problem using Hill Climbing
+
 class NQueensProblem(Problem):
 
     def __init__(self, N):
@@ -130,20 +129,23 @@ class NQueensProblem(Problem):
     def h(self, node):
         """Return number of conflicting queens for a given node"""
         num_conflicts = 0
-        for (r1, c1) in enumerate(node.state):
-            for(r2, c2) in enumerate(node.state):
+        # Write your code here
+        for (r1,c1) in enumerate(node.state):
+            for (r2,c2) in enumerate(node.state):
                 if (r1,c1)!=(r2,c2):
-                    num_conflicts+= self.conflict(r1, c1,r2, c2)
-
+                    num_conflicts += self.conflict(r1,c1,r2,c2) 
         return num_conflicts
+
 def shuffled(iterable):
     """Randomly shuffle a copy of iterable."""
     items = list(iterable)
     random.shuffle(items)
     return items
+
 def argmin_random_tie(seq, key):
     """Return an element with highest fn(seq[i]) score; break ties at random."""
     return min(shuffled(seq), key=key)
+
 def hill_climbing(problem,iterations = 10000):
     # as this is a stochastic algorithm, we will set a cap on the number of iterations        
     current = Node(problem.initial)
@@ -152,96 +154,84 @@ def hill_climbing(problem,iterations = 10000):
         neighbors = expand(problem,current.state)
         if not neighbors:
             break
-        neighbor = argmin_random_tie(neighbors,key=lambda node: problem.h(node))
-        if problem.h(neighbor)<=problem.h(current):
-            current.state= neighbor.state
-            if problem.goal_test(current.state) == True:
-                print("Goal test succeeded at iteration {0}.".format(i))
-                return current
+        neighbour = argmin_random_tie(neighbors,key=lambda node:problem.h(node))
+        if problem.h(neighbour)<=problem.h(current):
+            current.state= neighbour.state
+            if problem.goal_test(current.state)==True:
+                print('The Goal state is reached at {0}'.format(i))
+                return current 
+                
         i += 1        
     return current    
+
 nq1=NQueensProblem(8)
 plot_NQueens(nq1.initial)
 n1 = Node(state=nq1.initial)
 num_conflicts = nq1.h(n1)
 print("Initial Conflicts = {0}".format(num_conflicts))
-start=time.time()
 sol1=hill_climbing(nq1,iterations=20000)
-end=time.time()
-print("Timetaken={0}".format(end-start))
 sol1.state
 num_conflicts = nq1.h(sol1)
 print("Final Conflicts = {0}".format(num_conflicts))
 plot_NQueens(list(sol1.state))
+
+
 import time
+start=time.time()
+end=time.time()
+print("The total time required for 20000 iterations is {0:.4f} seconds".format(end-start))
+
 iterations=[10,20,30,40,50,1000,2000,3000,4000,5000,10000]
-timetaken=[]
+time_taken=[]
 num=1
-for i in iterations:
+for each_i in iterations:
+    print("Type {0}:\tIterations:{1}".format(num,each_i))
+    n1 = Node(state=nq1.initial)
+    num_conflicts = nq1.h(n1)
+    print("Initial Conflicts = {0}".format(num_conflicts))
     start=time.time()
-    sol1=hill_climbing(nq1,iterations=i)
+    sol1=hill_climbing(nq1,iterations=each_i)
     end=time.time()
-    print("The total time required for 2000 iterations is {0:.4f} seconds\n\n".format(end-start))
-    timetaken.append(end-start)
+    print(sol1.state)
+    num_conflicts = nq1.h(sol1)
+    print("Final Conflicts = {0}".format(num_conflicts))
+    print("The total time required for 20000 iterations is {0:.4f} seconds\n\n".format(end-start))
+    time_taken.append(end-start)
     num+=1
-import numpy as np
-import numpy as np
-from scipy.interpolate import make_interp_spline
-import matplotlib.pyplot as plt
- 
-# Dataset
-x = np.array(iterations)
-y = np.array(timetaken)
- 
-X_Y_Spline = make_interp_spline(x, y)
- 
-# Returns evenly spaced numbers
-# over a specified interval.
-X_ = np.linspace(x.min(), x.max(), 500)
-Y_ = X_Y_Spline(X_)
- 
-# Plotting the Graph
-plt.plot(X_, Y_)
-plt.title("graph between iteration and timetaken")
-plt.xlabel("iterations")
-plt.ylabel("timetaken")
-plt.show()
-
- 
-# Dataset
-x = np.array(iterations)
-y = np.array(timetaken)
- 
-# Plotting the Graph
-plt.plot(x, y)
-plt.title("graph between x and y")
-plt.xlabel("timetaken")
-plt.ylabel("number of iteration")
-plt.show()
-
-~~~
-
+    
+plt.title("Number of Iterations VS Time taken")
+plt.xlabel("Iteration")
+plt.ylabel("Time taken")
+plt.plot(iterations,time_taken)
+plt.show()    
+```
 
 ## OUTPUT:
-### Results.
-![2](https://user-images.githubusercontent.com/75235032/169693877-e621b3c4-59db-41cb-8ce5-86e9ed1f2242.jpg)
+
+![WhatsApp Image 2022-05-24 at 1 32 41 AM (1)](https://user-images.githubusercontent.com/75235818/169992554-f048586f-8c6b-404e-b3b7-90bec0ea8f72.jpeg)
+
 ### Shows the timetaken for each iterations.
-![4](https://user-images.githubusercontent.com/75235032/169693889-de45258d-5479-4a63-8665-fdba523ddf78.jpg)
+
+![WhatsApp Image 2022-05-24 at 1 32 41 AM (2)](https://user-images.githubusercontent.com/75235818/169993145-f66481a4-b316-473a-88a0-d6917df2f1de.jpeg)
+
+![WhatsApp Image 2022-05-24 at 1 32 41 AM (3)](https://user-images.githubusercontent.com/75235818/169993310-af70177b-a0e3-48f1-983c-54677dee4c02.jpeg)
+
+![WhatsApp Image 2022-05-24 at 1 32 41 AM (4)](https://user-images.githubusercontent.com/75235818/169993336-3ac3dab5-b561-4c8c-84c6-76e9fc9323f4.jpeg)
 
 when the iterations increase, to complete the search time increases too.
+
 ### 8-Queen (initial conflicts).
-![1](https://user-images.githubusercontent.com/75235032/169693907-27d4378e-d6ea-4c9b-b4a4-1b25f0411f52.jpg)
+
+![WhatsApp Image 2022-05-24 at 1 32 41 AM](https://user-images.githubusercontent.com/75235818/169992309-e8fe5a68-8fd3-4e42-b7ea-d490d5af3019.jpeg)
+
 #### (final solution)
-![3](https://user-images.githubusercontent.com/75235032/169693920-6c72f6a8-e7aa-44d7-9158-08dbe45927d7.jpg)
 
-
-
+![WhatsApp Image 2022-05-24 at 1 32 40 AM](https://user-images.githubusercontent.com/75235818/169993550-5e0ab50d-b6b7-4f86-a810-38b40f61f597.jpeg)
 
 ## Time Complexity Plot
 #### Plot a graph for the various value of N and time(seconds)
-![5](https://user-images.githubusercontent.com/75235032/169693942-5beca1ff-01b4-4f79-99e8-5279804481c2.jpg)
-![6](https://user-images.githubusercontent.com/75235032/169693943-b0a16ecb-3d48-4f2c-938c-cfc73979275b.jpg)
 
+![WhatsApp Image 2022-05-24 at 1 32 41 AM (5)](https://user-images.githubusercontent.com/75235818/169993421-383b6c28-107c-48e0-a994-bc94848aa1a3.jpeg)
 
 ## RESULT:
 Hence, this code solves the eight queens problem using the hill-climbing algorithm that has been implemented.
